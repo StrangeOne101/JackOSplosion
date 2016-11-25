@@ -2,6 +2,7 @@ package com.strangeone101.abilities;
 
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
@@ -13,6 +14,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.bukkit.Material;
@@ -36,9 +39,13 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 	private Vector direction;
 	private Random rand;
 	
+	private static Sound WITHER_SOUND;
+	private static Sound SPIDER_SOUND;
+	private static Sound WOLF_HOWL_SOUND;
+	
 	private ArmorStand pumpkinEntity;
 	
-	private static long cooldown = 1500L;
+	private static long cooldown = 3000L;
 	private static int range = 25;
 	private static double damage = 1.5D;
 	
@@ -48,18 +55,18 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		this.location = player.getEyeLocation().add(0, -0.3, 0);
 		this.startLocation = player.getEyeLocation().add(0, -0.3, 0);
 		this.direction = player.getEyeLocation().getDirection().normalize();
-		//this.location.getWorld().playSound(location, Sound.ENTITY_WOLF_HOWL, 1, 2F);
 		this.rand = new Random();
 		this.player = player;
 		
 		this.pumpkinEntity = this.location.getWorld().spawn(this.location.clone().add(0, -1.8, 0), ArmorStand.class);
 		this.pumpkinEntity.setVisible(false);
-		this.pumpkinEntity.setAI(false);
-		this.pumpkinEntity.setCustomName("");
-		this.pumpkinEntity.setCollidable(false);
+		this.pumpkinEntity.setCustomName(" ");
 		this.pumpkinEntity.setMarker(true);
-		this.pumpkinEntity.setSilent(true);
 		this.pumpkinEntity.setGravity(false);
+		this.pumpkinEntity.setAI(false);
+		this.pumpkinEntity.setCollidable(false);
+		this.pumpkinEntity.setSilent(true);
+		
 		this.pumpkinEntity.setVelocity(direction.multiply(10));
 		//this.pumpkinEntity.setHeadPose(new EulerAngle(direction.getX(), direction.getY(), direction.getZ()));
 		this.pumpkinEntity.setHelmet(new ItemStack(Material.PUMPKIN));
@@ -80,7 +87,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 					if (entity.isDead()) return;
 					if (ii % 2 == 0) { //Every half second
 						if (entity instanceof Player) {
-							((Player)entity).playSound(entity.getLocation(), Sound.ENTITY_WOLF_HOWL, 0.6F, 2F);
+							((Player)entity).playSound(entity.getLocation(), WOLF_HOWL_SOUND, 0.6F, 2F);
 						}
 						
 						JackPacketHandler.sendHelmetUpdate(entity, new ItemStack(Material.PUMPKIN), entity.getEntityId());
@@ -107,6 +114,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		meta.addEffect(FireworkEffect.builder().withColor(Color.RED, Color.BLACK, Color.ORANGE, Color.BLACK, Color.YELLOW).build());
 		firework.setFireworkMeta(meta);
 		firework.setSilent(true);
+		
 		final Firework f = firework;
 		new BukkitRunnable() {
 
@@ -157,17 +165,19 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		}
 		
 		if (rand.nextInt(5) == 0) {
-			this.location.getWorld().playSound(location, Sound.ENTITY_SPIDER_AMBIENT, 1F, 1.9F);
+			this.location.getWorld().playSound(location, SPIDER_SOUND, 1F, 1.9F);
 		}
 		
 		if (rand.nextInt(5) == 0) {
-			this.location.getWorld().playSound(location, Sound.ENTITY_WITHER_AMBIENT, 0.2F, 2F);
+			this.location.getWorld().playSound(location, WITHER_SOUND, 0.2F, 2F);
 		}
 		
 		ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.PUMPKIN, (byte)2), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
 		ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.WOOL, (byte)15), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
 		
 		for (Entity entity : GeneralMethods.getEntitiesAroundPoint(this.location, 1.8)) {
+			if (entity instanceof ArmorStand && !((ArmorStand)entity).isVisible()) continue;
+			
 			if (entity instanceof LivingEntity && entity.getEntityId() != player.getEntityId() && entity.getEntityId() != pumpkinEntity.getEntityId()) {
 				explode();
 				remove();
@@ -229,6 +239,17 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		ConfigManager.languageConfig.get().addDefault("Abilities.Avatar." + NAME + ".DeathMessage", "{victim} was spoooked by {attacker}!");
 		
 		ConfigManager.languageConfig.save();
+		
+		WITHER_SOUND = Sound.ENTITY_WITHER_AMBIENT;
+		SPIDER_SOUND = Sound.ENTITY_SPIDER_AMBIENT;
+		WOLF_HOWL_SOUND = Sound.ENTITY_WOLF_HOWL;
+		
+		Permission perm = new Permission("bending.ability.JackOSplosion");
+		if (Bukkit.getPluginManager().getPermission("bending.ability.JackOSplosion") == null) {
+			Bukkit.getPluginManager().addPermission(perm);
+			Bukkit.getPluginManager().getPermission("bending.ability.JackOSplosion").setDefault(PermissionDefault.TRUE);
+		}
+		
 	}
 
 	@Override
