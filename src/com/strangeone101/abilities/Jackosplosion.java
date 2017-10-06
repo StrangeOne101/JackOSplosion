@@ -1,6 +1,7 @@
 package com.strangeone101.abilities;
 
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -33,6 +34,8 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 
 	public static final String NAME = "JackOSplosion";
 	public static final boolean SHOW_PUMPKINS_GLOBALLY = true;
+	
+	private static CopyOnWriteArrayList<Firework> fireworks = new CopyOnWriteArrayList<Firework>();
 	
 	private Location location;
 	private Location startLocation;
@@ -106,7 +109,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 	}
 
 	public void explode() {
-		Firework firework = this.location.getWorld().spawn(this.location.clone().add(this.direction.clone().multiply(-0.2)), Firework.class);
+		final Firework firework = this.location.getWorld().spawn(this.location.clone().add(this.direction.clone().multiply(-0.2)), Firework.class);
 		FireworkMeta meta = firework.getFireworkMeta();
 		meta.clearEffects();
 		meta.setPower(5);
@@ -114,6 +117,8 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		meta.addEffect(FireworkEffect.builder().withColor(Color.RED, Color.BLACK, Color.ORANGE, Color.BLACK, Color.YELLOW).build());
 		firework.setFireworkMeta(meta);
 		firework.setSilent(true);
+		
+		fireworks.add(firework);
 		
 		final Firework f = firework;
 		new BukkitRunnable() {
@@ -123,6 +128,14 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 				f.detonate();
 			}
 		}.runTaskLater(ProjectKorra.plugin, 1L);
+		
+		new BukkitRunnable() {
+
+			@Override
+			public void run() {
+				fireworks.remove(firework);
+			}
+		}.runTaskLater(ProjectKorra.plugin, 4L);
 		
 		for (Entity e : GeneralMethods.getEntitiesAroundPoint(this.location, 2.5)) {
 			if (e instanceof LivingEntity && e.getEntityId() != player.getEntityId() && e.getEntityId() != this.pumpkinEntity.getEntityId()) {
@@ -217,7 +230,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 
 	@Override
 	public String getVersion() {
-		return "1.0 (2016)";
+		return "1.1 (2017)";
 	}
 
 	@Override
@@ -266,6 +279,10 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 	@Override
 	public String getDescription() {
 		return "Happy Halloween! Spread the spook with this fancy new move by clicking and haunting your friends! (Click to fire, haunts hit players)";
+	}
+	
+	public static boolean isJackOSplosion(Firework firework) {
+		return fireworks.contains(firework);
 	}
 
 }
