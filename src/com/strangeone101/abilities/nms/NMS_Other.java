@@ -14,7 +14,7 @@ import com.projectkorra.projectkorra.util.ReflectionHandler.PackageType;
 public class NMS_Other {
 	public static void sendHelmetUpdateRF(Player player, ItemStack item, int id) {
 		try {
-			Method asNMSCopy = ReflectionHandler.getMethod("CraftItemStack", PackageType.CRAFTBUKKIT_INVENTORY, "asNMSCopy", item.getClass());
+			Method asNMSCopy = ReflectionHandler.getMethod("CraftItemStack", PackageType.CRAFTBUKKIT_INVENTORY, "asNMSCopy", ItemStack.class);
 			Field slotField = ReflectionHandler.getField("EnumItemSlot", PackageType.MINECRAFT_SERVER, true, "HEAD");
 			Object itemCopy = asNMSCopy.invoke(null, item);
 			Constructor<?> packetConstructor = ReflectionHandler.getConstructor("PacketPlayOutEntityEquipment", PackageType.MINECRAFT_SERVER, Integer.TYPE, slotField.getType(), itemCopy.getClass());
