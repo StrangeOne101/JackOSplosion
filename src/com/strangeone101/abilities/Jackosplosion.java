@@ -72,7 +72,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		
 		this.pumpkinEntity.setVelocity(direction.multiply(10));
 		//this.pumpkinEntity.setHeadPose(new EulerAngle(direction.getX(), direction.getY(), direction.getZ()));
-		this.pumpkinEntity.setHelmet(new ItemStack(Material.PUMPKIN));
+		this.pumpkinEntity.setHelmet(new ItemStack(Material.CARVED_PUMPKIN));
 		
 		
 		bPlayer.addCooldown(this);
@@ -93,15 +93,17 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 							((Player)entity).playSound(entity.getLocation(), WOLF_HOWL_SOUND, 0.6F, 2F);
 						}
 						
-						JackPacketHandler.sendHelmetUpdate(entity, new ItemStack(Material.PUMPKIN), entity.getEntityId());
+						JackPacketHandler.sendHelmetUpdate(entity, new ItemStack(Material.CARVED_PUMPKIN), entity.getEntityId());
 						if (source.length > 0) DamageHandler.damageEntity(entity, source[0], damage, CoreAbility.getAbility(NAME));
 						else DamageHandler.damageEntity(entity, damage, CoreAbility.getAbility(NAME));
 					} else {
 						JackPacketHandler.sendHelmetUpdate(entity, entity.getEquipment().getHelmet(), entity.getEntityId());
 					}
-					
-					ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.PUMPKIN, (byte)2), 0.4F, 0.3F, 0.4F, 2F, 10, entity.getEyeLocation(), 128);
-					ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.WOOL, (byte)15), 0.4F, 0.3F, 0.4F, 2F, 10, entity.getEyeLocation(), 128);
+
+					ParticleEffect.BLOCK_CRACK.display(entity.getEyeLocation(), 10, 0.4D, 0.3D, 0.4D, 1, Material.PUMPKIN.createBlockData());
+					ParticleEffect.BLOCK_CRACK.display(entity.getEyeLocation(), 10, 0.4D, 0.3D, 0.4D, 1, Material.BLACK_WOOL.createBlockData());
+					//ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.PUMPKIN, (byte)2), 0.4F, 0.3F, 0.4F, 2F, 10, entity.getEyeLocation(), 128);
+					//ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.WOOL, (byte)15), 0.4F, 0.3F, 0.4F, 2F, 10, entity.getEyeLocation(), 128);
 				}
 				
 			}.runTaskLater(ProjectKorra.plugin, 10 * i);
@@ -184,9 +186,12 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 		if (rand.nextInt(5) == 0) {
 			this.location.getWorld().playSound(location, WITHER_SOUND, 0.2F, 2F);
 		}
-		
-		ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.PUMPKIN, (byte)2), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
-		ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.WOOL, (byte)15), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
+
+		ParticleEffect.BLOCK_CRACK.display(this.location, 6, 0.4D, 0.3D, 0.4D, 1, Material.PUMPKIN.createBlockData());
+		ParticleEffect.BLOCK_CRACK.display(this.location, 6, 0.4D, 0.3D, 0.4D, 1, Material.BLACK_WOOL.createBlockData());
+
+		//ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.PUMPKIN, (byte)2), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
+		//ParticleEffect.BLOCK_CRACK.display(new ParticleEffect.BlockData(Material.WOOL, (byte)15), 0.5F, 0.5F, 0.5F, 1F, 6, location, 128);
 		
 		for (Entity entity : GeneralMethods.getEntitiesAroundPoint(this.location, 1.8)) {
 			if (entity instanceof ArmorStand && !((ArmorStand)entity).isVisible()) continue;
@@ -230,7 +235,7 @@ public class Jackosplosion extends AvatarAbility implements AddonAbility {
 
 	@Override
 	public String getVersion() {
-		return "1.1 (2017)";
+		return "1.2 (2020)";
 	}
 
 	@Override
